@@ -2,6 +2,8 @@ import "./css/style.css";
 
 import { Inter } from "next/font/google";
 import Theme from "./theme-provider";
+import Header from "@/components/ui/header";
+import Footer from "@/components/ui/footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,11 +23,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      {/* suppressHydrationWarning: https://github.com/vercel/next.js/issues/44343 */}
+      {/* keep body free of fixed light colors */}
       <body className={`${inter.variable} font-inter tracking-tight antialiased`}>
         <Theme>
-          <div className="flex min-h-screen flex-col overflow-hidden supports-[overflow:clip]:overflow-clip">
-            {children}
+          {/* site-wide light/dark surface + text */}
+          <div className="min-h-dvh flex flex-col overflow-hidden supports-[overflow:clip]:overflow-clip bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+            <Header />
+            <main className="grow">{children}</main>
+            <Footer border={true} />
           </div>
         </Theme>
       </body>

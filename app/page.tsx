@@ -1,3 +1,4 @@
+
 export const metadata = {
   title: "Home - Simple",
   description: "Page description",
