@@ -1,0 +1,27 @@
+# dependencies
+node_modules
+.pnp.*
+.pnpjs
+
+# build
+dist
+.next
+out
+coverage
+.vite
+*.log
+
+# env
+.env
+.env.*
+!.env.example
+
+# editor
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# turbo / pnpm
+turbo
+pnpm-debug.log
