@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '../lib/useGame';
 import Pips from '../components/Pips';
+import HowToPlay from '../components/HowToPlay';
 
 export default function Page() {
   const state = useGame((s) => s.state as any);
@@ -35,6 +36,7 @@ export default function Page() {
           <div className="flex items-center gap-2">
             {/* Pips already has data-testid="pips" inside the component */}
             <Pips n={pips} />
+            <HowToPlay />
           </div>
         </header>
 
