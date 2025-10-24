@@ -14,7 +14,7 @@ const pwa = withPWA({
       handler: 'NetworkFirst',
       options: {
         cacheName: 'ff-page-shell',
-        expiration: { maxEntries: 16, maxAgeSeconds: 60 * 60 },
+        expiration: { maxEntries: 16, maxAgeSeconds: 3600 },
         networkTimeoutSeconds: 3,
       },
     },
@@ -26,4 +26,5 @@ export default pwa({
   reactStrictMode: true,
   output: 'export',
   images: { unoptimized: true },
+  transpilePackages: ['@focus-fade/core'],
 })

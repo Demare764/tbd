@@ -40,3 +40,19 @@ jobs:
 
       - name: Build
         run: pnpm -w build
+
+      - name: Install Playwright Browsers
+        run: pnpm dlx playwright install --with-deps
+
+      - name: Start Next (apps/web) in background
+        run: pnpm --filter @focus-fade/web dev &
+        env:
+          NODE_ENV: development
+
+      - name: E2E (Playwright)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          xvfb-run -a pnpm --filter @focus-fade/web test:e2e
+        env:
+          CI: true

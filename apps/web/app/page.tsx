@@ -1,30 +1,31 @@
-'use client'
+'use client';
 
-import { useMemo } from 'react'
-import { motion } from 'framer-motion'
-import { useGame } from '../lib/useGame'
-import Pips from '../components/Pips'
+import { useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { useGame } from '../lib/useGame';
+import Pips from '../components/Pips';
 
 export default function Page() {
-  const state = useGame((s) => s.state as any)
-  const input = useGame((s) => s.input)
-  const setInput = useGame((s) => s.setInput)
-  const submit = useGame((s) => s.submit)
-  const reset = useGame((s) => s.reset)
+  const state = useGame((s) => s.state as any);
+  const input = useGame((s) => s.input);
+  const setInput = useGame((s) => s.setInput);
+  const submit = useGame((s) => s.submit);
+  const reset = useGame((s) => s.reset);
 
   const rows = useMemo(() => {
-    const letters: string[][] = []
-    const taken = state.guesses?.map((g: any) => g.word) ?? []
+    const letters: string[][] = [];
+    const taken = state.guesses?.map((g: any) => g.word) ?? [];
     for (let r = 0; r < 6; r++) {
-      const word = taken[r] ?? ''
-      const row = Array.from({ length: 5 }, (_, c) => word[c] ?? '')
-      letters.push(row)
+      const word = taken[r] ?? '';
+      const row = Array.from({ length: 5 }, (_, c) => word[c] ?? '');
+      letters.push(row);
     }
-    return letters
-  }, [state.guesses])
+    return letters;
+  }, [state.guesses]);
 
-  const lost = state.status === 'lost'
-  const pips = typeof state.pips === 'number' ? state.pips : ('focusPips' in state ? state.focusPips : 0)
+  const lost = state.status === 'lost';
+  const victory = state.ended === true || state.status === 'won';
+  const pips = typeof state.pips === 'number' ? state.pips : ('focusPips' in state ? state.focusPips : 0);
 
   return (
     <main className="min-h-dvh bg-black text-white">
@@ -32,13 +33,19 @@ export default function Page() {
         <header className="flex items-center justify-between">
           <h1 className="text-lg tracking-wide">□ Focus Fade</h1>
           <div className="flex items-center gap-2">
+            {/* Pips already has data-testid="pips" inside the component */}
             <Pips n={pips} />
           </div>
         </header>
 
         <section className="mt-6 text-center">
           <div className="text-xs uppercase tracking-widest text-white/70">Target (avoid)</div>
-          <div className="mt-1 text-3xl font-light">{state.target}</div>
+          <div
+            className="mt-1 text-3xl font-light"
+            data-testid="target-word"
+          >
+            {state.target}
+          </div>
         </section>
 
         <section className="mt-6">
@@ -61,11 +68,31 @@ export default function Page() {
           </div>
         </section>
 
+        {/* Status banners for E2E */}
+        {victory && (
+          <div
+            className="mt-4 text-center text-base"
+            data-testid="victory"
+            aria-live="polite"
+          >
+            TOTAL FADE
+          </div>
+        )}
+        {lost && (
+          <div
+            className="mt-4 text-center text-base opacity-80"
+            data-testid="lost"
+            aria-live="polite"
+          >
+            Out of focus
+          </div>
+        )}
+
         <form
           className="mt-6 flex gap-2"
           onSubmit={(e) => {
-            e.preventDefault()
-            submit()
+            e.preventDefault();
+            submit();
           }}
         >
           <input
@@ -77,12 +104,14 @@ export default function Page() {
             onChange={(e) => setInput(e.target.value)}
             className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 font-mono text-lg tracking-widest outline-none focus:border-white/20"
             placeholder="TYPE 5 LETTERS"
-            disabled={lost}
+            disabled={lost || victory}
+            data-testid="guess-input"
           />
           <button
             type="submit"
             className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/10 disabled:opacity-40"
-            disabled={input.length !== 5 || lost}
+            disabled={input.length !== 5 || lost || victory}
+            data-testid="guess-button"
           >
             Guess
           </button>
@@ -90,7 +119,7 @@ export default function Page() {
 
         <div className="mt-4 flex items-center justify-between text-xs text-white/60">
           <div className={lost ? 'text-static' : ''}>
-            {lost ? 'Out of focus' : state.ended ? 'TOTAL FADE' : 'Avoid target letters'}
+            {lost ? 'Out of focus' : victory ? 'TOTAL FADE' : 'Avoid target letters'}
           </div>
           <button
             onClick={() => reset()}
@@ -101,5 +130,5 @@ export default function Page() {
         </div>
       </div>
     </main>
-  )
+  );
 }

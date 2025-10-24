@@ -1,26 +1,34 @@
-'use client'
+'use client';
 
-import { useEffect, useRef } from 'react'
-import { motion, useAnimationControls } from 'framer-motion'
+import { useEffect, useMemo, useRef } from 'react';
+import { motion, useAnimationControls } from 'framer-motion';
 
-type Props = { n: number }
+type Props = { n: number };
 
 export default function Pips({ n }: Props) {
-  const prev = useRef(n)
-  const ctrls = [useAnimationControls(), useAnimationControls(), useAnimationControls()]
+  const prev = useRef(n);
+
+  // Create individual controllers
+  const c0 = useAnimationControls();
+  const c1 = useAnimationControls();
+  const c2 = useAnimationControls();
+
+  // Keep the array identity stable across renders
+  const ctrls = useMemo(() => [c0, c1, c2], [c0, c1, c2]);
 
   useEffect(() => {
-    const old = prev.current
+    const old = prev.current;
     if (n < old) {
-      const turnedOffIndex = Math.max(0, Math.min(2, n)) // the dot that just turned off
+      // The dot that just turned off (2 when going 3→2, 1 for 2→1, 0 for 1→0)
+      const turnedOffIndex = Math.max(0, Math.min(2, n));
       ctrls[turnedOffIndex].start({
         scale: [1, 0.6, 1],
         opacity: [1, 0.3, 0.6],
         transition: { duration: 0.25 },
-      })
+      });
     }
-    prev.current = n
-  }, [n, ctrls])
+    prev.current = n;
+  }, [n, ctrls]);
 
   return (
     <div
@@ -28,17 +36,18 @@ export default function Pips({ n }: Props) {
       aria-label={`${n} focus pips remaining`}
       title={`${n} focus pips remaining`}
       className="flex items-center gap-1"
+      data-testid="pips"
     >
       {[0, 1, 2].map((i) => {
-        const on = i < n
+        const on = i < n;
         return (
           <motion.span
             key={i}
             animate={ctrls[i]}
             className={`h-3 w-3 rounded-full ${on ? 'bg-white' : 'bg-white/25'}`}
           />
-        )
+        );
       })}
     </div>
-  )
+  );
 }
