@@ -4,25 +4,20 @@
     "jsx": "preserve",
     "noEmit": true,
     "baseUrl": ".",
-    "paths": {
-      "@focus-fade/core": ["../../packages/core/src/index.ts"]
-    },
     "allowJs": true,
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
-      {
-        "name": "next"
-      }
+      { "name": "next" }
     ]
   },
   "include": [
     "app/**/*",
+    "components/**/*",
+    "lib/**/*",
     "eslint.config.mjs",
     "next-env.d.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
