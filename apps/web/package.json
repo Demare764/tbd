@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 -p 3000",
-    "build": "next build",
+    "build": "pnpm --filter @focus-fade/core build && next build",
     "start": "next start -p 3000",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
