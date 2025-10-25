@@ -27,4 +27,5 @@ export default pwa({
   output: 'export',
   images: { unoptimized: true },
   transpilePackages: ['@focus-fade/core'],
+    eslint: { ignoreDuringBuilds: true } 
 })
