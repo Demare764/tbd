@@ -121,7 +121,7 @@ export default function RushPage() {
           }}
         >
           <input
-            inputMode="latin"
+            inputMode="text"
             autoComplete="off"
             spellCheck={false}
             maxLength={5}
