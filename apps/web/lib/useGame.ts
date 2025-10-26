@@ -31,7 +31,11 @@ export const useGame = create<Store>((set, get) => ({
   },
   submit() {
     const { state, input } = get()
-    if (input.length !== 5 || state.ended) return { type: 'noop' } as EngineEvent
+    // Block submit if not 5 letters OR already ended OR pips are gone
+    if (input.length !== 5) return { type: 'noop' } as EngineEvent
+    if (state.ended || selectors.remainingPips(state) <= 0) {
+      return { type: 'noop' } as EngineEvent
+    }
     const { state: next, event } = submitGuess(state, input)
     set({ state: next, input: '' })
     return event

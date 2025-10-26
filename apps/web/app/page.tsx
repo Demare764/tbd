@@ -25,14 +25,11 @@ export default function Page() {
     return letters
   }, [state.guesses])
 
-  const lost = state.status === 'lost'
+  const remaining = selectors.remainingPips(state)
+  const lost =
+    remaining <= 0 || state.status === 'lost' || (state.ended && state.status !== 'won')
   const victory = state.ended === true || state.status === 'won'
-  const pips =
-    typeof state.pips === 'number'
-      ? state.pips
-      : 'focusPips' in state
-      ? state.focusPips
-      : 0
+  const pips = remaining
   const fade = selectors.fade(state) // 0..1
 
   return (
@@ -137,9 +134,11 @@ export default function Page() {
         </form>
 
         {/* Dictionary hint */}
-        {input.length === 5 && !isDictionaryWord(input) && !lost && !victory && (
-          <div className="mt-2 text-xs text-red-300/90" role="alert">
-            Not in dictionary
+        {input.length === 5 && !lost && !victory && (
+          // If your core exposes isDictionaryWord, you can re-enable this for live hinting:
+          // !isDictionaryWord(input)
+          <div className="mt-2 text-xs text-white/60" role="status">
+            Submit to validate
           </div>
         )}
 
@@ -156,5 +155,6 @@ export default function Page() {
     </main>
   )
 }
+
 
 
