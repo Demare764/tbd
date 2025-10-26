@@ -98,7 +98,7 @@ export default function Page() {
           }}
         >
           <input
-            inputMode="latin"
+            inputMode="text"
             autoComplete="off"
             spellCheck={false}
             maxLength={5}
