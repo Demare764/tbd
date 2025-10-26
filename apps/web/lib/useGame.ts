@@ -19,6 +19,9 @@ type Store = {
 }
 
 const INITIAL_TARGET = 'PLANT'
+const isWon = (s: GameState) =>
+  selectors.fade(s) >= 0.999 || (s as any).status === 'won' || (s as any).ended === true
+const isLost = (s: GameState) => selectors.remainingPips(s) <= 0 || (s as any).status === 'lost'
 
 export const useGame = create<Store>((set, get) => ({
   state: createGame('classic', INITIAL_TARGET, {
@@ -31,11 +34,9 @@ export const useGame = create<Store>((set, get) => ({
   },
   submit() {
     const { state, input } = get()
-    // Block submit if not 5 letters OR already ended OR pips are gone
     if (input.length !== 5) return { type: 'noop' } as EngineEvent
-    if (state.ended || selectors.remainingPips(state) <= 0) {
-      return { type: 'noop' } as EngineEvent
-    }
+    if (isLost(state) || isWon(state)) return { type: 'noop' } as EngineEvent
+
     const { state: next, event } = submitGuess(state, input)
     set({ state: next, input: '' })
     return event
@@ -49,9 +50,7 @@ export const useGame = create<Store>((set, get) => ({
     })
   },
   onKeyDown(e) {
-    if (e.key === 'Escape') {
-      set({ input: '' })
-    }
+    if (e.key === 'Escape') set({ input: '' })
   },
 }))
 

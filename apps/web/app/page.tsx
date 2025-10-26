@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useGame } from '../lib/useGame'
 import Pips from '../components/Pips'
 import HowToPlay from '../components/HowToPlay'
-import { selectors, isDictionaryWord } from '@focus-fade/core'
+import { selectors } from '@focus-fade/core'
 
 export default function Page() {
   const state = useGame((s) => s.state as any)
@@ -26,11 +26,11 @@ export default function Page() {
   }, [state.guesses])
 
   const remaining = selectors.remainingPips(state)
-  const lost =
-    remaining <= 0 || state.status === 'lost' || (state.ended && state.status !== 'won')
-  const victory = state.ended === true || state.status === 'won'
-  const pips = remaining
   const fade = selectors.fade(state) // 0..1
+
+  const won = fade >= 0.999 || state.status === 'won' || state.ended === true
+  const lost = remaining <= 0 || state.status === 'lost'
+  const pips = remaining
 
   return (
     <main className="min-h-dvh bg-black text-white">
@@ -43,7 +43,6 @@ export default function Page() {
           </div>
         </header>
 
-        {/* Fade meter */}
         <div className="mt-4 h-2 w-full rounded-full bg-white/10 overflow-hidden">
           <motion.div
             className="h-full bg-white/60"
@@ -54,9 +53,7 @@ export default function Page() {
         </div>
 
         <section className="mt-6 text-center">
-          <div className="text-xs uppercase tracking-widest text-white/70">
-            Target (avoid)
-          </div>
+          <div className="text-xs uppercase tracking-widest text-white/70">Target (avoid)</div>
           <div className="mt-1 text-3xl font-light" data-testid="target-word">
             {state.target}
           </div>
@@ -82,21 +79,13 @@ export default function Page() {
           </div>
         </section>
 
-        {victory && (
-          <div
-            className="mt-4 text-center text-base"
-            data-testid="victory"
-            aria-live="polite"
-          >
+        {won && (
+          <div className="mt-4 text-center text-base" data-testid="victory" aria-live="polite">
             TOTAL FADE
           </div>
         )}
         {lost && (
-          <div
-            className="mt-4 text-center text-base opacity-80"
-            data-testid="lost"
-            aria-live="polite"
-          >
+          <div className="mt-4 text-center text-base opacity-80" data-testid="lost" aria-live="polite">
             Out of focus
           </div>
         )}
@@ -120,30 +109,21 @@ export default function Page() {
             onChange={(e) => setInput(e.target.value)}
             className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 font-mono text-lg tracking-widest outline-none focus:border-white/20"
             placeholder="TYPE 5 LETTERS"
-            disabled={lost || victory}
+            disabled={lost || won}
             data-testid="guess-input"
           />
           <button
             type="submit"
             className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/10 disabled:opacity-40"
-            disabled={input.length !== 5 || lost || victory}
+            disabled={input.length !== 5 || lost || won}
             data-testid="guess-button"
           >
             Guess
           </button>
         </form>
 
-        {/* Dictionary hint */}
-        {input.length === 5 && !lost && !victory && (
-          // If your core exposes isDictionaryWord, you can re-enable this for live hinting:
-          // !isDictionaryWord(input)
-          <div className="mt-2 text-xs text-white/60" role="status">
-            Submit to validate
-          </div>
-        )}
-
         <div className="mt-4 flex items-center justify-between text-xs text-white/60">
-          <div>{lost ? 'Out of focus' : victory ? 'TOTAL FADE' : 'Avoid target letters'}</div>
+          <div>{lost ? 'Out of focus' : won ? 'TOTAL FADE' : 'Avoid target letters'}</div>
           <button
             onClick={() => reset()}
             className="rounded-lg border border-white/10 px-2 py-1 hover:bg-white/10"
