@@ -25,11 +25,16 @@ export default function Page() {
     return letters
   }, [state.guesses])
 
-  const remaining = selectors.remainingPips(state)
+  const remainingRaw = selectors.remainingPips(state)
+  const remaining =
+    typeof remainingRaw === 'number' && Number.isFinite(remainingRaw) ? remainingRaw : 0
+
   const fade = selectors.fade(state) // 0..1
 
+  // Victory has priority over loss in UI
   const won = fade >= 0.999 || state.status === 'won' || state.ended === true
-  const lost = remaining <= 0 || state.status === 'lost'
+  const lost = !won && (remaining <= 0 || state.status === 'lost')
+
   const pips = remaining
 
   return (
@@ -79,16 +84,16 @@ export default function Page() {
           </div>
         </section>
 
-        {won && (
+        {/* Status banner (mutually exclusive) */}
+        {won ? (
           <div className="mt-4 text-center text-base" data-testid="victory" aria-live="polite">
             TOTAL FADE
           </div>
-        )}
-        {lost && (
+        ) : lost ? (
           <div className="mt-4 text-center text-base opacity-80" data-testid="lost" aria-live="polite">
             Out of focus
           </div>
-        )}
+        ) : null}
 
         <form
           className="mt-6 flex gap-2"
