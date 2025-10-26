@@ -22,19 +22,30 @@ const pwa = withPWA({
   buildExcludes: [/middleware-manifest\.json$/],
 })
 
-export default pwa({
-  reactStrictMode: true,
-  output: 'export',
-  images: { unoptimized: true },
-  transpilePackages: ['@focus-fade/core'],
-    eslint: { ignoreDuringBuilds: true } 
-webpack: (config) => {
-    // Force @focus-fade/core to resolve to the built dist folder
+/**
+ * Wrap the Next config so webpack alias is guaranteed to be inside the export.
+ */
+const withAlias = (nextConfig = {}) => ({
+  ...nextConfig,
+  webpack(config, ctx) {
     config.resolve = config.resolve || {}
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       '@focus-fade/core': coreDist,
     }
+    // Preserve user-provided webpack if present
+    if (typeof nextConfig.webpack === 'function') {
+      return nextConfig.webpack(config, ctx)
+    }
     return config
-  }
+  },
 })
+
+export default pwa({
+  reactStrictMode: true,
+  output: 'export',
+  images: { unoptimized: true },
+  transpilePackages: ['@focus-fade/core'],
+    eslint: { ignoreDuringBuilds: true }, 
+ })
+)
