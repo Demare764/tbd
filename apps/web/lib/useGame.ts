@@ -15,12 +15,15 @@ type Store = {
   setInput: (s: string) => void
   submit: () => EngineEvent
   reset: (target?: string) => void
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 const INITIAL_TARGET = 'PLANT'
 
 export const useGame = create<Store>((set, get) => ({
-  state: createGame('classic', INITIAL_TARGET, { classic: { attemptsToWin: 6, focusPips: 3 } }),
+  state: createGame('classic', INITIAL_TARGET, {
+    classic: { attemptsToWin: 6, focusPips: 3 },
+  }),
   input: '',
   setInput(s) {
     const v = s.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5)
@@ -28,15 +31,23 @@ export const useGame = create<Store>((set, get) => ({
   },
   submit() {
     const { state, input } = get()
+    if (input.length !== 5 || state.ended) return { type: 'noop' } as EngineEvent
     const { state: next, event } = submitGuess(state, input)
     set({ state: next, input: '' })
     return event
   },
   reset(target = INITIAL_TARGET) {
     set({
-      state: createGame('classic', target, { classic: { attemptsToWin: 6, focusPips: 3 } }),
+      state: createGame('classic', target, {
+        classic: { attemptsToWin: 6, focusPips: 3 },
+      }),
       input: '',
     })
+  },
+  onKeyDown(e) {
+    if (e.key === 'Escape') {
+      set({ input: '' })
+    }
   },
 }))
 

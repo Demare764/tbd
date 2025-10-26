@@ -1,32 +1,39 @@
-'use client';
+'use client'
 
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { useGame } from '../lib/useGame';
-import Pips from '../components/Pips';
-import HowToPlay from '../components/HowToPlay';
+import { useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { useGame } from '../lib/useGame'
+import Pips from '../components/Pips'
+import HowToPlay from '../components/HowToPlay'
+import { selectors, isDictionaryWord } from '@focus-fade/core'
 
 export default function Page() {
-  const state = useGame((s) => s.state as any);
-  const input = useGame((s) => s.input);
-  const setInput = useGame((s) => s.setInput);
-  const submit = useGame((s) => s.submit);
-  const reset = useGame((s) => s.reset);
+  const state = useGame((s) => s.state as any)
+  const input = useGame((s) => s.input)
+  const setInput = useGame((s) => s.setInput)
+  const submit = useGame((s) => s.submit)
+  const reset = useGame((s) => s.reset)
 
   const rows = useMemo(() => {
-    const letters: string[][] = [];
-    const taken = state.guesses?.map((g: any) => g.word) ?? [];
+    const letters: string[][] = []
+    const taken = state.guesses?.map((g: any) => g.word) ?? []
     for (let r = 0; r < 6; r++) {
-      const word = taken[r] ?? '';
-      const row = Array.from({ length: 5 }, (_, c) => word[c] ?? '');
-      letters.push(row);
+      const word = taken[r] ?? ''
+      const row = Array.from({ length: 5 }, (_, c) => word[c] ?? '')
+      letters.push(row)
     }
-    return letters;
-  }, [state.guesses]);
+    return letters
+  }, [state.guesses])
 
-  const lost = state.status === 'lost';
-  const victory = state.ended === true || state.status === 'won';
-  const pips = typeof state.pips === 'number' ? state.pips : ('focusPips' in state ? state.focusPips : 0);
+  const lost = state.status === 'lost'
+  const victory = state.ended === true || state.status === 'won'
+  const pips =
+    typeof state.pips === 'number'
+      ? state.pips
+      : 'focusPips' in state
+      ? state.focusPips
+      : 0
+  const fade = selectors.fade(state) // 0..1
 
   return (
     <main className="min-h-dvh bg-black text-white">
@@ -34,18 +41,26 @@ export default function Page() {
         <header className="flex items-center justify-between">
           <h1 className="text-lg tracking-wide">□ Focus Fade</h1>
           <div className="flex items-center gap-2">
-            {/* Pips already has data-testid="pips" inside the component */}
             <Pips n={pips} />
             <HowToPlay />
           </div>
         </header>
 
+        {/* Fade meter */}
+        <div className="mt-4 h-2 w-full rounded-full bg-white/10 overflow-hidden">
+          <motion.div
+            className="h-full bg-white/60"
+            initial={{ width: '0%' }}
+            animate={{ width: `${Math.round(fade * 100)}%` }}
+            transition={{ type: 'tween', duration: 0.15 }}
+          />
+        </div>
+
         <section className="mt-6 text-center">
-          <div className="text-xs uppercase tracking-widest text-white/70">Target (avoid)</div>
-          <div
-            className="mt-1 text-3xl font-light"
-            data-testid="target-word"
-          >
+          <div className="text-xs uppercase tracking-widest text-white/70">
+            Target (avoid)
+          </div>
+          <div className="mt-1 text-3xl font-light" data-testid="target-word">
             {state.target}
           </div>
         </section>
@@ -70,7 +85,6 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Status banners for E2E */}
         {victory && (
           <div
             className="mt-4 text-center text-base"
@@ -93,11 +107,14 @@ export default function Page() {
         <form
           className="mt-6 flex gap-2"
           onSubmit={(e) => {
-            e.preventDefault();
-            submit();
+            e.preventDefault()
+            submit()
           }}
         >
           <input
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setInput('')
+            }}
             inputMode="text"
             autoComplete="off"
             spellCheck={false}
@@ -119,10 +136,15 @@ export default function Page() {
           </button>
         </form>
 
-        <div className="mt-4 flex items-center justify-between text-xs text-white/60">
-          <div className={lost ? 'text-static' : ''}>
-            {lost ? 'Out of focus' : victory ? 'TOTAL FADE' : 'Avoid target letters'}
+        {/* Dictionary hint */}
+        {input.length === 5 && !isDictionaryWord(input) && !lost && !victory && (
+          <div className="mt-2 text-xs text-red-300/90" role="alert">
+            Not in dictionary
           </div>
+        )}
+
+        <div className="mt-4 flex items-center justify-between text-xs text-white/60">
+          <div>{lost ? 'Out of focus' : victory ? 'TOTAL FADE' : 'Avoid target letters'}</div>
           <button
             onClick={() => reset()}
             className="rounded-lg border border-white/10 px-2 py-1 hover:bg-white/10"
@@ -132,5 +154,7 @@ export default function Page() {
         </div>
       </div>
     </main>
-  );
+  )
 }
+
+
