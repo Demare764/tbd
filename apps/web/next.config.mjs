@@ -28,4 +28,13 @@ export default pwa({
   images: { unoptimized: true },
   transpilePackages: ['@focus-fade/core'],
     eslint: { ignoreDuringBuilds: true } 
+webpack: (config) => {
+    // Force @focus-fade/core to resolve to the built dist folder
+    config.resolve = config.resolve || {}
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@focus-fade/core': coreDist,
+    }
+    return config
+  }
 })
